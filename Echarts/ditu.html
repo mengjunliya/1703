@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/china.js"></script>
+</head>
+<body>
+<div id="main" style="width: 800px;height:500px;"></div>
+<script>
+    $(function () {
+        var count=[];
+        $.ajax({
+            type:"get",
+            url:"json/provence.json",
+            dataType:"json",
+            async:false,
+            success:function (data) {
+                // console.log(data);
+                $.each(data.data,function (index,item) {
+                    delete item.latitude;
+                    delete item.longitude;
+                    console.log(item);
+                    item.value=item.count;
+                    delete item.count;
+                    count.push(item);
+                })
+            }
+        });
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+        function randomData() {
+            return Math.round(Math.random()*1000);
+        }
+
+        option = {
+            tooltip: {
+                trigger: 'item',
+                formatter:function (data) {
+                    var d=data.data;
+                    return d.name+"<br>"+"转载量:"+d.value;
+                }
+            },
+            visualMap: {
+                min: 0,
+                max: 3000,
+                left: 'left',
+                top: 'bottom',
+                text: ['高','低'],           // 文本，默认为数值文本
+                calculable: true
+            },
+            series: [
+                {
+                    type: 'map',
+                    mapType: 'china',
+                    roam: false,
+                    label: {
+                        normal: {
+                            show: false
+                        },
+                        emphasis: {
+                            show: false
+                        }
+                    },
+                    data:count
+                },
+            ]
+        };
+
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    })
+
+
+</script>
+</body>
+</html>

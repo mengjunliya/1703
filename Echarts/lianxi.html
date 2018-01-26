@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+</head>
+<body>
+<div id="main" style="width: 1000px;height:500px;"></div>
+<script>
+    $(function () {
+        var cdate=[];
+        var OriginalCount=[];
+        var ReprintCount=[];
+        var originalrate=[];
+        $.ajax({
+            type:"get",
+            url:"json/fgl.json",
+            dataType:"json",
+            async:false,
+            success:function (data) {
+                console.log(data);
+                if(data.result){
+                    $.each(data.data,function (index,item) {
+                        cdate.push(item.cdate.substr(5));
+                        OriginalCount.push(item.OriginalCount);
+                        ReprintCount.push(item.ReprintCount);
+                        originalrate.push(item.originalrate.substr(0,item.originalrate.length-1));
+                    })
+                }
+
+            }
+        });
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+        option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    crossStyle: {
+                        color: '#999'
+                    }
+                }
+            },
+            legend: {
+                data:['转载量','原创量','原创率(%)']
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data:cdate,
+                    axisPointer: {
+                        type: 'shadow',
+                    },
+                    axisLabel:{
+                        rotate:45,
+                    },
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    min: 0,
+                    max: 25000,
+                    interval: 5000,
+                    axisLabel: {
+                        formatter: '{value} '
+                    }
+                },
+                {
+                    type: 'value',
+                    min: 0,
+                    max: 30,
+                    interval: 5,
+                    axisLabel: {
+                        formatter: '{value}'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name:'转载量',
+                    type:'bar',
+                    stack:"aa",
+                    itemStyle:{
+                        color:"rgb(190,148,97)",
+                        barBorderRadius:20,
+                    },
+                    barMaxWidth:10,
+                    data:ReprintCount,
+                },
+                {
+                    name:'原创量',
+                    type:'bar',
+                    stack:"aa",
+                    itemStyle:{
+                        color:"red",
+                        barBorderRadius:20,
+                    },
+                    barMaxWidth:10,
+                    data:OriginalCount,
+                },
+                {
+                    name:'原创率(%)',
+                    type:'line',
+                    yAxisIndex: 1,
+                    color:"rgb(101,185,247)",
+                    data:originalrate,
+                }
+            ],
+            dataZoom:[
+                {
+                    type:"inside",
+                },
+                {
+                    filterMode: 'filter'
+                }
+            ],
+
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    })
+
+
+</script>
+</body>
+</html>

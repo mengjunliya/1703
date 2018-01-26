@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/china.js"></script>
+    <style>
+        .tiao{display: none;width:1500px;height:700px;}
+        #two{display: block;}
+        #main3{width:70%;height:100%;float: left;}
+        #main2{width: 30%;height: 100%;float: right;}
+    </style>
+</head>
+<body>
+<div id="two" class="tiao">
+    <div id="main3"></div>
+    <div id="main2"></div>
+</div>
+<script>
+    $(function () {
+        $.getJSON("json/citys.json",function(dt){
+            var myChart = echarts.init(document.getElementById('main3'));
+            var myChart1 = echarts.init(document.getElementById('main2'));
+            var names=[];
+            var city={name:"",value:""};
+            $.each(dt.data,function (index,item) {
+                city={name:item.name,value:[item.longitude,item.latitude,item.count]};
+                names.push(city);
+            });
+
+            // 左边的地图
+            option = {
+                tooltip : {
+                    trigger: 'item',
+                    formatter: function (names) {
+                        return names.data.name+":"+names.data.value[2];
+                    },
+                    //自定义标签
+                },
+                backgroundColor: '#28241b',  //大图的背景颜色
+                legend: {
+                    orient: 'vertical',
+                    y: 'bottom',
+                    x:'right',
+                    data:['pm2.5'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                geo: {
+                    map: 'china',
+                    label: {
+                        emphasis: {
+                            show: false
+                        }
+                    },
+                    roam: true,
+                    itemStyle: {
+                        normal: {
+                            areaColor: '#4a3d2c',  //地图的背景颜色
+                            borderColor: '#111'
+                        },
+                        emphasis: {
+                            areaColor: '#827359'   //鼠标放上去的地图颜色
+                        }
+                    }
+                },
+                series : [
+                    {
+                        name: 'pm2.5',
+                        type: 'scatter',
+                        coordinateSystem: 'geo',
+                        data: names,
+                        label: {
+                            normal: {
+                                formatter: '{b}',
+                                position: 'right',
+                                show: false
+                            },
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: '#fffd53',  //圆球的颜色
+                            }
+                        }
+                    },
+                    {
+                        type: 'effectScatter',
+                        coordinateSystem: 'geo',
+                        data: names,
+                        symbolSize: function (val) {
+                            return val[2]/1000;
+                        },
+                        rippleEffect: {
+                            brushType: 'stroke'
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: '#fffd53',  //圆球的颜色
+                                shadowBlur: 10,
+                                shadowColor: '#333'
+                            }
+                        },
+                        zlevel: 1
+                    }
+                ]
+            };
+            //右面分布的
+            option1={
+                backgroundColor: '#28241b',  //大图的背景颜色
+                tooltip : {
+                    trigger: 'item'  //悬浮提示框不显示
+                },
+                grid:{     //绘图区调整
+                    x:40,  //左留白
+                    y:10,   //上留白
+                    x2:0,  //右留白
+                    y2:10   //下留白
+                },
+                xAxis : [
+                    {
+                        show:false,
+                        type : 'value',
+                        boundaryGap : [0, 0],
+                        position: 'top'
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'category',
+                        // data:names.name,
+                        data : ['巴西','印尼','美国','印度','中国','内蒙古','a','b','c','d','中国','内蒙古'],
+                        axisLine:{show:false},     //坐标轴
+                        axisTick:[{                //坐标轴小标记
+                            show:false
+                        }],
+                        axisLabel:{
+                            textStyle:{
+                                fontSize:'30',
+                            }
+                        }
+                    }
+                ],
+                series : [
+                    {
+                        name:'',
+                        type:'bar',
+                        tooltip:{show:false},
+                        barMinHeight:10,   //最小柱高
+                        barWidth: 15,      //柱宽度
+                        barMaxWidth:80,    //最大柱宽度
+                        // data:names.count,
+                        data:[1, 23489, 29034, 104970, 0, 63030,63230,30230,63030,63230,63030,63230],
+                        itemStyle:{
+                            normal:{   //柱状图颜色
+                                barBorderRadius:30,
+                                color:'#ab8364',
+                                label:{
+                                    show: true,           //显示文本
+                                    position: '',  //数据值位置
+                                    textStyle:{
+                                        color:'transparent',
+                                        fontSize:'15',
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+            myChart1.setOption(option1);
+            window.onresize=myChart.resize;
+        });
+    })
+
+
+</script>
+</body>
+</html>
